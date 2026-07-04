@@ -15,15 +15,15 @@ app.use(passport.session());
 
 app.use((req, res, next) => { console.log(req.method, req.path); next(); });
 
-// Mounted without an /api prefix: cPanel's Node.js App proxy strips the
-// "/api" base URI before forwarding requests here, so paths arrive as if
-// the app were deployed at root. /auth is reached the same way, via /api/auth/*.
-try { app.use('/auth',     require('./routes/auth'));     console.log('✓ auth'); } catch(e) { console.error('✗ auth:', e.message); }
-try { app.use('/',         require('./routes/packages')); console.log('✓ packages'); } catch(e) { console.error('✗ packages:', e.message); }
-try { app.use('/bookings', require('./routes/bookings')); console.log('✓ bookings'); } catch(e) { console.error('✗ bookings:', e.message); }
-try { app.use('/payments', require('./routes/payments')); console.log('✓ payments'); } catch(e) { console.error('✗ payments:', e.message); }
-try { app.use('/admin',    require('./routes/admin'));    console.log('✓ admin'); } catch(e) { console.error('✗ admin:', e.message); }
-try { app.use('/features', require('./routes/features')); console.log('✓ features'); } catch(e) { console.error('✗ features:', e.message); }
+// cPanel's Node.js App proxy forwards the full original path unchanged
+// (it does not strip the "/api" base URI), so every mount here matches
+// the actual external URL the frontend calls, including /api/auth/*.
+try { app.use('/api/auth',     require('./routes/auth'));     console.log('✓ auth'); } catch(e) { console.error('✗ auth:', e.message); }
+try { app.use('/api',          require('./routes/packages')); console.log('✓ packages'); } catch(e) { console.error('✗ packages:', e.message); }
+try { app.use('/api/bookings', require('./routes/bookings')); console.log('✓ bookings'); } catch(e) { console.error('✗ bookings:', e.message); }
+try { app.use('/api/payments', require('./routes/payments')); console.log('✓ payments'); } catch(e) { console.error('✗ payments:', e.message); }
+try { app.use('/api/admin',    require('./routes/admin'));    console.log('✓ admin'); } catch(e) { console.error('✗ admin:', e.message); }
+try { app.use('/api/features', require('./routes/features')); console.log('✓ features'); } catch(e) { console.error('✗ features:', e.message); }
 
 app.use((err, req, res, next) => { console.error('ERROR:', err.message); res.status(500).json({ error: err.message }); });
 app.get('/health', (req, res) => res.json({ ok: true }));
