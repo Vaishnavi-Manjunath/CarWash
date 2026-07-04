@@ -7,6 +7,15 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(255) NOT NULL,
   picture VARCHAR(500),
   role ENUM('customer','admin','marketing') DEFAULT 'customer',
+  referral_code VARCHAR(20) UNIQUE NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS staff (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  phone VARCHAR(20),
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS slogans (
@@ -38,9 +47,67 @@ CREATE TABLE IF NOT EXISTS bookings (
   payment_status ENUM('pending','paid','failed') DEFAULT 'pending',
   payment_order_id VARCHAR(255),
   payment_txn_id VARCHAR(255),
+  staff_id INT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (package_id) REFERENCES packages(id)
+  FOREIGN KEY (package_id) REFERENCES packages(id),
+  FOREIGN KEY (staff_id) REFERENCES staff(id)
+);
+CREATE TABLE IF NOT EXISTS reviews (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  booking_id INT NOT NULL,
+  user_id INT NOT NULL,
+  rating INT NOT NULL,
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (booking_id) REFERENCES bookings(id),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS loyalty (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL UNIQUE,
+  points INT DEFAULT 0,
+  total_earned INT DEFAULT 0,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS promo_codes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,
+  discount_type ENUM('percent','flat') DEFAULT 'percent',
+  discount_value DECIMAL(10,2) NOT NULL,
+  max_uses INT DEFAULT 100,
+  used_count INT DEFAULT 0,
+  valid_until DATE NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS gallery (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  before_url VARCHAR(500),
+  after_url VARCHAR(500),
+  caption VARCHAR(255),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  image_url VARCHAR(500),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS service_areas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  pincode VARCHAR(10) UNIQUE NOT NULL,
+  area_name VARCHAR(255) NOT NULL,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS settings (
+  key_name VARCHAR(100) PRIMARY KEY,
+  value TEXT
 );
 CREATE TABLE IF NOT EXISTS social_accounts (
   id INT AUTO_INCREMENT PRIMARY KEY,
